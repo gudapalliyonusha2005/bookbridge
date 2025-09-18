@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BookBridge — Simple</title>
+<script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-6 flex flex-col items-center min-h-screen">
+
+<h1 class="text-3xl font-bold mb-6">BookBridge — Simple</h1>
+
+<!-- Book Form -->
+<div class="bg-white p-6 rounded-lg shadow-md w-full max-w-lg mb-6">
+  <p class="mb-2">Add a book to share with classmates (saved in your browser).</p>
+  <form id="bookForm" class="grid grid-cols-1 gap-3">
+    <input type="text" id="title" placeholder="e.g. Database Systems" class="border p-2 rounded w-full" required>
+    <input type="text" id="author" placeholder="Author (optional)" class="border p-2 rounded w-full">
+    <input type="text" id="owner" placeholder="Your name or roll no." class="border p-2 rounded w-full">
+    <input type="text" id="contact" placeholder="Phone or email" class="border p-2 rounded w-full">
+    <div class="flex gap-3">
+      <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Add Book</button>
+      <button type="button" id="clearBooks" class="bg-gray-400 text-white px-4 py-2 rounded hover:bg-gray-500">Clear all books</button>
+    </div>
+  </form>
+</div>
+
+<!-- Books List -->
+<div class="bg-white p-6 rounded-lg shadow-md w-full max-w-lg">
+  <div class="flex justify-between items-center mb-3">
+    <h2 class="text-xl font-semibold">Available Books (<span id="bookCount">0</span>)</h2>
+    <input type="text" id="search" placeholder="Search title/author/owner" class="border p-1 rounded w-1/2">
+  </div>
+  <ul id="bookList" class="space-y-2">
+    <li class="text-gray-500">No books found.</li>
+  </ul>
+</div>
+
+<script>
+const bookForm = document.getElementById('bookForm');
+const bookList = document.getElementById('bookList');
+const bookCount = document.getElementById('bookCount');
+const search = document.getElementById('search');
+const clearBooks = document.getElementById('clearBooks');
+
+let books = [];
+
+// Add book
+bookForm.addEventListener('submit', function(e) {
+  e.preventDefault();
+  const title = document.getElementById('title').value.trim();
+  const author = document.getElementById('author').value.trim();
+  const owner = document.getElementById('owner').value.trim();
+  const contact = document.getElementById('contact').value.trim();
+
+  if(!title || !owner || !contact) {
+    alert("Please fill title, owner, and contact!");
+    return;
+  }
+
+  books.push({title, author, owner, contact});
+  renderBooks();
+  bookForm.reset();
+});
+
+// Clear all books
+clearBooks.addEventListener('click', function() {
+  books = [];
+  renderBooks();
+});
+
+// Render books
+function renderBooks() {
+  const searchTerm = search.value.toLowerCase();
+  const filtered = books.filter(book =>
+    book.title.toLowerCase().includes(searchTerm) ||
+    book.author.toLowerCase().includes(searchTerm) ||
+    book.owner.toLowerCase().includes(searchTerm)
+  );
+
+  bookList.innerHTML = '';
+  if(filtered.length === 0) {
+    bookList.innerHTML = '<li class="text-gray-500">No books found.</li>';
+  } else {
+    filtered.forEach((book, index) => {
+      const li = document.createElement('li');
+      li.className = "border p-2 rounded flex justify-between items-center bg-gray-50";
+      li.innerHTML = `<span><strong>${book.title}</strong> by ${book.author || "Unknown"} (Owner: ${book.owner}, Contact: ${book.contact})</span>
+                      <button class="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600" onclick="removeBook(${index})">Remove</button>`;
+      bookList.appendChild(li);
+    });
+  }
+  bookCount.textContent = filtered.length;
+}
+
+// Remove single book
+function removeBook(index) {
+  books.splice(index, 1);
+  renderBooks();
+}
+
+// Search
+search.addEventListener('input', renderBooks);
+</script>
+
+</body>
+</html>
